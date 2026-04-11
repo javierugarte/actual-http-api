@@ -60,6 +60,8 @@
  */
 
 module.exports = (router) => {
+  const { config } = require('../../config/config');
+  const { EXPERIMENTAL_DISABLED_MESSAGE } = require('./constants');
   /**
    * @swagger
    * /budgets/{budgetSyncId}/run-query:
@@ -99,9 +101,14 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/400'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    */
   router.post('/budgets/:budgetSyncId/run-query', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       const queryParams = req.body.ActualQLquery;
       if (!queryParams) {
         throw new Error('ActualQLquery is required in the request body');
