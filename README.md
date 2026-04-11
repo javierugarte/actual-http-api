@@ -58,10 +58,6 @@ The service reads several environment variables (from `src/config/config.js`). D
 - `PORT` (optional) — Port this service listens on. Default: `5007`.
 - `NODE_ENV` (optional) — Node environment (e.g. `production`, `development`). If not `production`, `.env` will be loaded by `dotenv`.
 
-### Experimental / unofficial operations
-
-- `EXPERIMENTAL_OPERATIONS_ENABLED` (optional) — Toggle to enable experimental endpoints that rely on Actual internals. Defaults to enabled (true). Set to `false` to disable these endpoints; when disabled the HTTP server will respond with `501 Not Implemented` for those operations and they will be hidden from the Swagger UI.
-
 Swagger / API docs configuration (defaults used to build the docs URL shown in the UI):
 - `SWAGGER_PROTOCOL` — Default: `https`
 - `SWAGGER_HOST` — Default: `localhost`
@@ -71,6 +67,10 @@ Swagger / API docs configuration (defaults used to build the docs URL shown in t
 Notes:
 - `API_KEY` and `ACTUAL_SERVER_PASSWORD` are loaded using a helper that accepts either the value itself or a path to a file by appending `_PATH` to the variable name (useful for Docker secrets).
 - If you run the container mapping port `5007` to the host (common for local runs), set `SWAGGER_PROTOCOL=http` and `SWAGGER_PORT=5007` if you want the Swagger UI links to reflect your local address.
+
+### Experimental / unofficial operations
+
+- `EXPERIMENTAL_OPERATIONS_ENABLED` (optional) — Toggle to enable experimental endpoints that rely on Actual internals. Defaults to enabled (true). Set to `false` to disable these endpoints; when disabled the HTTP server will respond with `501 Not Implemented` for those operations and they will be hidden from the Swagger UI.
 
 ## Documentation
 
