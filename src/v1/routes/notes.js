@@ -35,7 +35,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/notes/category/{categoryId}:
    *   get:
-   *     summary: Returns notes for a category
+   *     summary: "(🔧 Extended) Returns notes for a category"
+   *     description: "🔧 Extended: Uses official library APIs with additional business logic or transformations."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -76,8 +77,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/notes/category/{categoryId}:
    *   put:
-   *     summary: Sets (creates or replaces) notes for a category
-   *     description: "⚠️ **Warning:** This endpoint interacts with the internals of Actual rather than the official API. It is not considered stable or secure for use and may change without notice."
+   *     summary: "(⚠️ Unofficial) Sets (creates or replaces) notes for a category"
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -114,8 +115,8 @@ module.exports = (router) => {
    *       '500':
    *         $ref: '#/components/responses/500'
    *   delete:
-   *     summary: Deletes notes for a category
-   *     description: "⚠️ **Warning:** This endpoint interacts with the internals of Actual rather than the official API. It is not considered stable or secure for use and may change without notice."
+   *     summary: "(⚠️ Unofficial) Deletes notes for a category"
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -162,7 +163,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/notes/account/{accountId}:
    *   get:
-   *     summary: Returns notes for an account
+   *     summary: "(🔧 Extended) Returns notes for an account"
+   *     description: "🔧 Extended: Uses official library APIs with additional business logic or transformations."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -203,8 +205,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/notes/account/{accountId}:
    *   put:
-   *     summary: Sets (creates or replaces) notes for an account
-   *     description: "⚠️ **Warning:** This endpoint interacts with the internals of Actual rather than the official API. It is not considered stable or secure for use and may change without notice."
+   *     summary: "(⚠️ Unofficial) Sets (creates or replaces) notes for an account"
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -241,8 +243,8 @@ module.exports = (router) => {
    *       '500':
    *         $ref: '#/components/responses/500'
    *   delete:
-   *     summary: Deletes notes for an account
-   *     description: "⚠️ **Warning:** This endpoint interacts with the internals of Actual rather than the official API. It is not considered stable or secure for use and may change without notice."
+   *     summary: "(⚠️ Unofficial) Deletes notes for an account"
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -289,7 +291,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/notes/budgetmonth/{budgetMonth}:
    *   get:
-   *     summary: Returns notes for a budget month
+   *     summary: "(🔧 Extended) Returns notes for a budget month"
+   *     description: "🔧 Extended: Uses official library APIs with additional business logic or transformations."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -330,8 +333,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/notes/budgetmonth/{budgetMonth}:
    *   put:
-   *     summary: Sets (creates or replaces) notes for a budget month
-   *     description: "⚠️ **Warning:** This endpoint interacts with the internals of Actual rather than the official API. It is not considered stable or secure for use and may change without notice."
+   *     summary: "(⚠️ Unofficial) Sets (creates or replaces) notes for a budget month"
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []
@@ -368,8 +371,8 @@ module.exports = (router) => {
    *       '500':
    *         $ref: '#/components/responses/500'
    *   delete:
-   *     summary: Deletes notes for a budget month
-   *     description: "⚠️ **Warning:** This endpoint interacts with the internals of Actual rather than the official API. It is not considered stable or secure for use and may change without notice."
+   *     summary: "(⚠️ Unofficial) Deletes notes for a budget month"
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Notes]
    *     security:
    *       - apiKey: []

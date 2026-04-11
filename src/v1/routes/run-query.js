@@ -64,7 +64,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/run-query:
    *   post:
-   *     summary: Runs an arbitrary ActualQL query
+   *     summary: "(⚠️ Unofficial) Runs an arbitrary ActualQL query"
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Query]
    *     security:
    *       - apiKey: []

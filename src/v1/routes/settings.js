@@ -193,7 +193,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/export:
    *   get:
-   *     summary: Exports the budget data as a zip file containing db.sqlite and metadata.json files.
+   *     summary: "(⚠️ Unofficial) Exports the budget data as a zip file containing db.sqlite and metadata.json files."
+   *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
    *     tags: [Settings]
    *     security:
    *       - apiKey: []

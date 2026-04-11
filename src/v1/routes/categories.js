@@ -163,7 +163,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/categories/{categoryId}:
    *   get:
-   *     summary: Returns a category information
+   *     summary: "(🔧 Extended) Returns a category information"
+   *     description: "🔧 Extended: Uses official library APIs with additional business logic or transformations."
    *     tags: [Categories]
    *     security:
    *       - apiKey: []

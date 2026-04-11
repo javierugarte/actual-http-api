@@ -106,7 +106,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/accounts/{accountId}:
    *   get:
-   *     summary: Returns account information
+   *     summary: "(🔧 Extended) Returns account information"
+   *     description: "🔧 Extended: Uses official library APIs with additional business logic or transformations."
    *     tags: [Accounts]
    *     security:
    *       - apiKey: []
@@ -200,7 +201,8 @@ module.exports = (router) => {
    * @swagger                                                                                                                                                                                                                               
    * /budgets/{budgetSyncId}/accounts/{accountId}/balancehistory:                                                                                                                                                                                  
    *   get:                                                                                                                                                                                                                                 
-   *     summary: Gets the balance history for an account, from start to end date, with daily granularity. Until date is optional, defaults to today.
+   *     summary: "(🔧 Extended) Gets the balance history for an account, from start to end date, with daily granularity. Until date is optional, defaults to today."
+   *     description: "🔧 Extended: Uses official library APIs with additional business logic or transformations."
    *     tags: [Accounts]
    *     security:                                                                                                                                                                                                                          
    *       - apiKey: []                                                                                                                                                                                                                     

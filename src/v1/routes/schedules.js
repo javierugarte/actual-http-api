@@ -268,7 +268,8 @@ module.exports = (router) => {
    * @swagger
    * /budgets/{budgetSyncId}/schedules/{scheduleId}:
    *   get:
-   *     summary: Returns a schedule
+   *     summary: "(🔧 Extended) Returns a schedule"
+   *     description: "🔧 Extended: Uses official library APIs with additional business logic or transformations."
    *     tags: [Schedules]
    *     security:
    *       - apiKey: []
