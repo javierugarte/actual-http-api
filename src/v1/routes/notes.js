@@ -30,6 +30,8 @@
  */
 
 module.exports = (router) => {
+  const { config } = require('../../config/config');
+  const { EXPERIMENTAL_DISABLED_MESSAGE } = require('./constants');
 
   /**
    * @swagger
@@ -114,6 +116,8 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/404'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    *   delete:
    *     summary: "(⚠️ Unofficial) Deletes notes for a category"
    *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
@@ -137,9 +141,14 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/404'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    */
   router.put('/budgets/:budgetSyncId/notes/category/:categoryId', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       if (typeof req.body?.data !== 'string') {
         throw new Error('Request body must include a "data" string field');
       }
@@ -152,6 +161,9 @@ module.exports = (router) => {
 
   router.delete('/budgets/:budgetSyncId/notes/category/:categoryId', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       await res.locals.budget.setCategoryNotes(req.params.categoryId, null);
       res.json({ message: 'Category notes deleted' });
     } catch (err) {
@@ -242,6 +254,8 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/404'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    *   delete:
    *     summary: "(⚠️ Unofficial) Deletes notes for an account"
    *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
@@ -265,9 +279,14 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/404'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    */
   router.put('/budgets/:budgetSyncId/notes/account/:accountId', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       if (typeof req.body?.data !== 'string') {
         throw new Error('Request body must include a "data" string field');
       }
@@ -280,6 +299,9 @@ module.exports = (router) => {
 
   router.delete('/budgets/:budgetSyncId/notes/account/:accountId', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       await res.locals.budget.setAccountNotes(req.params.accountId, null);
       res.json({ message: 'Account notes deleted' });
     } catch (err) {
@@ -370,6 +392,8 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/404'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    *   delete:
    *     summary: "(⚠️ Unofficial) Deletes notes for a budget month"
    *     description: "⚠️ Unofficial: Interacts with the internals of the official library APIs. It is not considered stable or secure for use and may change without notice."
@@ -393,9 +417,14 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/404'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    */
   router.put('/budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       if (typeof req.body?.data !== 'string') {
         throw new Error('Request body must include a "data" string field');
       }
@@ -408,6 +437,9 @@ module.exports = (router) => {
 
   router.delete('/budgets/:budgetSyncId/notes/budgetmonth/:budgetMonth', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       await res.locals.budget.setBudgetMonthNotes(req.params.budgetMonth, null);
       res.json({ message: 'Budget month notes deleted' });
     } catch (err) {

@@ -54,6 +54,8 @@ const pkg = require('../../../package.json');
  */
 
 module.exports = (router) => {
+  const { config } = require('../../config/config');
+  const { EXPERIMENTAL_DISABLED_MESSAGE } = require('./constants');
   /**
    * @swagger
    * /budgets:
@@ -208,9 +210,14 @@ module.exports = (router) => {
    *         $ref: '#/components/responses/404'
    *       '500':
    *         $ref: '#/components/responses/500'
+   *       '501':
+   *         $ref: '#/components/responses/501'
    */
   router.get('/budgets/:budgetSyncId/export', async (req, res, next) => {
     try {
+      if (!config.experimentalOperationsEnabled) {
+        return res.status(501).json({ error: EXPERIMENTAL_DISABLED_MESSAGE });
+      }
       const { fileName, fileStream } = await res.locals.budget.exportData(req.params.budgetSyncId);
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', `attachment; filename=${encodeURIComponent(fileName)}`);

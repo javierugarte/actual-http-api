@@ -58,6 +58,10 @@ The service reads several environment variables (from `src/config/config.js`). D
 - `PORT` (optional) — Port this service listens on. Default: `5007`.
 - `NODE_ENV` (optional) — Node environment (e.g. `production`, `development`). If not `production`, `.env` will be loaded by `dotenv`.
 
+### Experimental / unofficial operations
+
+- `EXPERIMENTAL_OPERATIONS_ENABLED` (optional) — Toggle to enable experimental endpoints that rely on Actual internals. Defaults to enabled (true). Set to `false` to disable these endpoints; when disabled the HTTP server will respond with `501 Not Implemented` for those operations and they will be hidden from the Swagger UI.
+
 Swagger / API docs configuration (defaults used to build the docs URL shown in the UI):
 - `SWAGGER_PROTOCOL` — Default: `https`
 - `SWAGGER_HOST` — Default: `localhost`

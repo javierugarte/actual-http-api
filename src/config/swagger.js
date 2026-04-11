@@ -76,3 +76,21 @@ const openapiSpecification = swaggerJsdoc({
   });
 
 exports.openapiSpecification = openapiSpecification;
+// If experimental operations are disabled, remove any operations marked as unofficial
+if (!config.experimentalOperationsEnabled) {
+  const { UNOFFICIAL_PREFIX } = require('./constants');
+  const paths = openapiSpecification.paths || {};
+  Object.keys(paths).forEach((p) => {
+    const methods = paths[p];
+    Object.keys(methods).forEach((m) => {
+      const op = methods[m];
+      if (op && typeof op.summary === 'string' && op.summary.startsWith(UNOFFICIAL_PREFIX)) {
+        delete methods[m];
+      }
+    });
+    // If no methods remain on the path, remove the path entirely
+    if (Object.keys(methods).length === 0) {
+      delete openapiSpecification.paths[p];
+    }
+  });
+}
