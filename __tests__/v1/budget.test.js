@@ -138,6 +138,7 @@ describe('Budget Module', () => {
     getActualDataDir.mockReturnValue('/data/actual');
     archiver.mockReturnValue(mockArchive);
     path.join.mockImplementation((...args) => args.join('/'));
+    fs.existsSync.mockReturnValue(false);
   });
 
   describe('Budget Initialization', () => {
@@ -151,6 +152,32 @@ describe('Budget Module', () => {
       expect(mockActualApi.downloadBudget).toHaveBeenCalledWith('sync-pwd', {
         password: 'password123'
       });
+    });
+
+    it('should remove the local cache and download the budget again when Actual reports a new file key', async () => {
+      fs.existsSync.mockReturnValue(true);
+      mockActualApi.sync.mockRejectedValueOnce({ reason: 'file-has-new-key' });
+
+      await Budget('sync1', 'password123');
+
+      expect(mockActualApi.loadBudget).toHaveBeenCalledWith('budget1');
+      expect(fs.rmSync).toHaveBeenCalledWith('/data/actual/budget1', {
+        recursive: true,
+        force: true
+      });
+      expect(mockActualApi.downloadBudget).toHaveBeenCalledWith('sync1', {
+        password: 'password123'
+      });
+    });
+
+    it('should rethrow errors that are not caused by a new file key', async () => {
+      fs.existsSync.mockReturnValue(true);
+      mockActualApi.sync.mockRejectedValueOnce(new Error('sync failed'));
+
+      await expect(Budget('sync1', undefined)).rejects.toThrow('sync failed');
+
+      expect(fs.rmSync).not.toHaveBeenCalled();
+      expect(mockActualApi.downloadBudget).not.toHaveBeenCalled();
     });
   });
 

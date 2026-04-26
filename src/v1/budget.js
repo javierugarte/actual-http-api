@@ -7,13 +7,48 @@ const fs = require('fs');
 const path = require('path');
 
 let syncIdToBudgetId = {};
+let budgetOpenQueue = Promise.resolve();
+
+async function withBudgetOpenLock(operation) {
+  const run = budgetOpenQueue.then(operation, operation);
+  budgetOpenQueue = run.catch(() => {});
+  return run;
+}
 
 async function Budget(budgetSyncId, budgetEncryptionPassword) {
-  const actualApi = await getActualApiClient();
-  if (budgetSyncId in syncIdToBudgetId) {
-    await actualApi.loadBudget(syncIdToBudgetId[budgetSyncId]);
-    await actualApi.sync();
-  } else {
+  let actualApi;
+
+  await withBudgetOpenLock(async () => {
+    actualApi = await getActualApiClient();
+    refreshSincIdToBudgetIdMap();
+
+    if (budgetSyncId in syncIdToBudgetId) {
+      await loadAndSyncBudget(budgetSyncId);
+    } else {
+      await downloadBudget(budgetSyncId, budgetEncryptionPassword);
+      refreshSincIdToBudgetIdMap();
+    }
+  });
+
+  async function loadAndSyncBudget(budgetSyncId) {
+    try {
+      await actualApi.loadBudget(syncIdToBudgetId[budgetSyncId]);
+      await actualApi.sync();
+    } catch (err) {
+      if (!isFileHasNewKeyError(err)) {
+        throw err;
+      }
+
+      const staleBudgetId = syncIdToBudgetId[budgetSyncId];
+      console.warn(`Budget ${budgetSyncId} has a new encryption key. Removing local cache and downloading it again.`);
+      removeCachedBudget(staleBudgetId);
+      delete syncIdToBudgetId[budgetSyncId];
+      await downloadBudget(budgetSyncId, budgetEncryptionPassword);
+      refreshSincIdToBudgetIdMap();
+    }
+  }
+
+  async function downloadBudget(budgetSyncId, budgetEncryptionPassword) {
     if (budgetEncryptionPassword) {
       await actualApi.downloadBudget(budgetSyncId, {
         password: budgetEncryptionPassword
@@ -21,7 +56,21 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
     } else {
       await actualApi.downloadBudget(budgetSyncId);
     }
-    refreshSincIdToBudgetIdMap();
+  }
+
+  function removeCachedBudget(budgetId) {
+    if (!budgetId) {
+      return;
+    }
+
+    const budgetDir = path.join(getActualDataDir(), budgetId);
+    if (fs.existsSync(budgetDir)) {
+      fs.rmSync(budgetDir, { recursive: true, force: true });
+    }
+  }
+
+  function isFileHasNewKeyError(err) {
+    return err && err.reason === 'file-has-new-key';
   }
 
   async function getMonths() {
