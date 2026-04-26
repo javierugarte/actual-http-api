@@ -1,21 +1,21 @@
-FROM node:22-alpine AS build_image
+FROM node:22-bookworm-slim AS deps
 
 WORKDIR /usr/src/app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 make g++ pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
 
-RUN npm install --production
-RUN npm ci --omit=dev
-
-COPY . .
-
-FROM node:22-alpine AS runner_image
+FROM node:22-bookworm-slim AS runner
 
 WORKDIR /usr/src/app
 
-COPY --from=build_image /usr/src/app/node_modules ./node_modules
-ADD src ./src
-ADD package*.json server.js entrypoint.sh ./
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY src ./src
+COPY package*.json server.js entrypoint.sh ./
 
 RUN chmod +x entrypoint.sh
 
@@ -23,6 +23,6 @@ ENV PORT=5007
 ENV ACTUAL_DATA_DIR=/data
 ENV NODE_ENV=production
 
-EXPOSE ${PORT}
+EXPOSE 5007
 
-ENTRYPOINT [ "./entrypoint.sh" ]
+ENTRYPOINT ["./entrypoint.sh"]
