@@ -19,36 +19,96 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
   let actualApi;
 
   await withBudgetOpenLock(async () => {
+    logBudgetDebug('Opening budget', {
+      budgetSyncId,
+      dataDir: getActualDataDir()
+    });
     actualApi = await getActualApiClient();
     refreshSincIdToBudgetIdMap();
+    logBudgetDebug('Budget cache map refreshed', {
+      budgetSyncId,
+      cachedBudgetId: syncIdToBudgetId[budgetSyncId],
+      knownBudgetCount: Object.keys(syncIdToBudgetId).length
+    });
 
     if (budgetSyncId in syncIdToBudgetId) {
       await loadAndSyncBudget(budgetSyncId);
     } else {
+      logBudgetDebug('Budget not found in local cache map. Downloading budget.', {
+        budgetSyncId,
+        hasEncryptionPassword: !!budgetEncryptionPassword
+      });
       await downloadBudget(budgetSyncId, budgetEncryptionPassword);
       refreshSincIdToBudgetIdMap();
+      logBudgetDebug('Budget cache map refreshed after download', {
+        budgetSyncId,
+        cachedBudgetId: syncIdToBudgetId[budgetSyncId],
+        knownBudgetCount: Object.keys(syncIdToBudgetId).length
+      });
     }
   });
 
   async function loadAndSyncBudget(budgetSyncId) {
+    const budgetId = syncIdToBudgetId[budgetSyncId];
+    logBudgetDebug('Loading cached budget', {
+      budgetSyncId,
+      budgetId
+    });
+
     try {
-      await actualApi.loadBudget(syncIdToBudgetId[budgetSyncId]);
-      await actualApi.sync();
+      await actualApi.loadBudget(budgetId);
+      logBudgetDebug('Cached budget loaded. Starting sync.', {
+        budgetSyncId,
+        budgetId
+      });
+      const syncResult = await actualApi.sync();
+      logBudgetDebug('Sync finished', {
+        budgetSyncId,
+        budgetId,
+        syncResultSummary: summarizeSyncResult(syncResult)
+      });
+      const recoverableSyncErrorReason = getRecoverableSyncCacheErrorReason(syncResult);
+      if (recoverableSyncErrorReason) {
+        await recoverFromStaleBudgetCache(budgetSyncId, recoverableSyncErrorReason);
+      }
     } catch (err) {
+      logBudgetDebug('Sync threw an error', {
+        budgetSyncId,
+        budgetId,
+        errorSummary: summarizeError(err)
+      });
       if (!isRecoverableSyncCacheError(err)) {
         throw err;
       }
 
-      const staleBudgetId = syncIdToBudgetId[budgetSyncId];
-      console.warn(`Budget ${budgetSyncId} local cache is stale (${err.reason}). Removing local cache and downloading it again.`);
-      removeCachedBudget(staleBudgetId);
-      delete syncIdToBudgetId[budgetSyncId];
-      await downloadBudget(budgetSyncId, budgetEncryptionPassword);
-      refreshSincIdToBudgetIdMap();
+      await recoverFromStaleBudgetCache(budgetSyncId, err.reason);
     }
   }
 
+  async function recoverFromStaleBudgetCache(budgetSyncId, reason) {
+    const staleBudgetId = syncIdToBudgetId[budgetSyncId];
+    logBudgetWarning('Budget local cache is stale. Removing local cache and downloading it again.', {
+      budgetSyncId,
+      staleBudgetId,
+      reason,
+      dataDir: getActualDataDir()
+    });
+    removeCachedBudget(staleBudgetId);
+    delete syncIdToBudgetId[budgetSyncId];
+    await downloadBudget(budgetSyncId, budgetEncryptionPassword);
+    refreshSincIdToBudgetIdMap();
+    logBudgetDebug('Budget cache recovery finished', {
+      budgetSyncId,
+      refreshedBudgetId: syncIdToBudgetId[budgetSyncId],
+      knownBudgetCount: Object.keys(syncIdToBudgetId).length
+    });
+  }
+
   async function downloadBudget(budgetSyncId, budgetEncryptionPassword) {
+    logBudgetDebug('Downloading budget from Actual server', {
+      budgetSyncId,
+      hasEncryptionPassword: !!budgetEncryptionPassword
+    });
     if (budgetEncryptionPassword) {
       await actualApi.downloadBudget(budgetSyncId, {
         password: budgetEncryptionPassword
@@ -56,21 +116,84 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
     } else {
       await actualApi.downloadBudget(budgetSyncId);
     }
+    logBudgetDebug('Budget download finished', {
+      budgetSyncId
+    });
   }
 
   function removeCachedBudget(budgetId) {
     if (!budgetId) {
+      logBudgetWarning('Skipping local cache removal because budget id is missing', {
+        dataDir: getActualDataDir()
+      });
       return;
     }
 
     const budgetDir = path.join(getActualDataDir(), budgetId);
-    if (fs.existsSync(budgetDir)) {
+    const exists = fs.existsSync(budgetDir);
+    logBudgetDebug('Checking local budget cache directory before removal', {
+      budgetId,
+      budgetDir,
+      exists
+    });
+    if (exists) {
       fs.rmSync(budgetDir, { recursive: true, force: true });
+      logBudgetWarning('Removed local budget cache directory', {
+        budgetId,
+        budgetDir
+      });
+    } else {
+      logBudgetWarning('Local budget cache directory did not exist during removal', {
+        budgetId,
+        budgetDir
+      });
     }
   }
 
   function isRecoverableSyncCacheError(err) {
     return err && ['file-has-new-key', 'out-of-sync'].includes(err.reason);
+  }
+
+  function getRecoverableSyncCacheErrorReason(result) {
+    const reason = result && result.error && result.error.reason;
+    return ['file-has-new-key', 'out-of-sync'].includes(reason) ? reason : null;
+  }
+
+  function logBudgetDebug(message, details = {}) {
+    console.log(`[actual-http-api][budget] ${message}`, details);
+  }
+
+  function logBudgetWarning(message, details = {}) {
+    console.warn(`[actual-http-api][budget] ${message}`, details);
+  }
+
+  function summarizeSyncResult(result) {
+    if (!result) {
+      return { empty: true };
+    }
+
+    return {
+      hasError: !!result.error,
+      errorReason: result.error && result.error.reason,
+      errorMessage: result.error && result.error.message,
+      messageCount: Array.isArray(result.messages) ? result.messages.length : undefined,
+      keys: Object.keys(result)
+    };
+  }
+
+  function summarizeError(err) {
+    if (!err) {
+      return { empty: true };
+    }
+
+    return {
+      name: err.name,
+      message: err.message,
+      reason: err.reason,
+      type: err.type,
+      meta: err.meta,
+      stackFirstLine: err.stack && err.stack.split('\n')[0]
+    };
   }
 
   async function getMonths() {
