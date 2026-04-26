@@ -170,6 +170,22 @@ describe('Budget Module', () => {
       });
     });
 
+    it('should remove the local cache and download the budget again when Actual reports out-of-sync', async () => {
+      fs.existsSync.mockReturnValue(true);
+      mockActualApi.sync.mockRejectedValueOnce({ reason: 'out-of-sync' });
+
+      await Budget('sync1', 'password123');
+
+      expect(mockActualApi.loadBudget).toHaveBeenCalledWith('budget1');
+      expect(fs.rmSync).toHaveBeenCalledWith('/data/actual/budget1', {
+        recursive: true,
+        force: true
+      });
+      expect(mockActualApi.downloadBudget).toHaveBeenCalledWith('sync1', {
+        password: 'password123'
+      });
+    });
+
     it('should rethrow errors that are not caused by a new file key', async () => {
       fs.existsSync.mockReturnValue(true);
       mockActualApi.sync.mockRejectedValueOnce(new Error('sync failed'));

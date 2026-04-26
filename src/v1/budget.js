@@ -35,12 +35,12 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
       await actualApi.loadBudget(syncIdToBudgetId[budgetSyncId]);
       await actualApi.sync();
     } catch (err) {
-      if (!isFileHasNewKeyError(err)) {
+      if (!isRecoverableSyncCacheError(err)) {
         throw err;
       }
 
       const staleBudgetId = syncIdToBudgetId[budgetSyncId];
-      console.warn(`Budget ${budgetSyncId} has a new encryption key. Removing local cache and downloading it again.`);
+      console.warn(`Budget ${budgetSyncId} local cache is stale (${err.reason}). Removing local cache and downloading it again.`);
       removeCachedBudget(staleBudgetId);
       delete syncIdToBudgetId[budgetSyncId];
       await downloadBudget(budgetSyncId, budgetEncryptionPassword);
@@ -69,8 +69,8 @@ async function Budget(budgetSyncId, budgetEncryptionPassword) {
     }
   }
 
-  function isFileHasNewKeyError(err) {
-    return err && err.reason === 'file-has-new-key';
+  function isRecoverableSyncCacheError(err) {
+    return err && ['file-has-new-key', 'out-of-sync'].includes(err.reason);
   }
 
   async function getMonths() {
